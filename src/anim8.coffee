@@ -1,3 +1,23 @@
+# Copyright (C) 2012 Benson Wong
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# 
+
 # polyfill for request animation time... 
 # credit: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 do ->
@@ -34,11 +54,10 @@ do ->
 # Start Plugin 
 #
 $ = jQuery
-
-# cache of already loaded images
+# cache of already loaded images and other resources
 Cache =
-    # this is a cache of $.Deferred objects so we don't load an image more than
-    # once
+    # this is a really simple cache of $.Deferred objects so we don't pull them down 
+    # more than once
     cache: {}
     loadSprites: (src) ->
         if ! @cache[src]?
@@ -66,6 +85,7 @@ Cache =
                     def.reject reason
         @cache[src]
 
+# Hey, straight from the jQuery guidelines ... ;)
 methods =
     init: (options) ->
         settings = $.extend
@@ -142,9 +162,11 @@ methods =
 
             canvas = $this.get(0)
             context = canvas.getContext "2d"
-
+            
+            # 
+            # The animation loop function 
+            #
             animate = (now) ->
-
                 if (data.lastTime > 0 and now - data.lastTime < data.frameDelay)
                     window.requestAnimationFrame animate
                     return
@@ -188,5 +210,4 @@ $.fn.anim8 = (method, args...) ->
     else
         $.error "Method #{method} does not exist on jQuery.anim8"
 
-           
             
