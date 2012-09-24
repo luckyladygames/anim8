@@ -1,0 +1,192 @@
+# polyfill for request animation time... 
+# credit: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+do ->
+    # hey, there's no point if it already exists... 
+    return if window.requestAnimationFrame
+
+    lastTime = 0
+    vendors = ["ms", "moz", "webkit", "o"]
+    for vendor in vendors 
+        break if window.requestAnimationFrame?
+        window.requestAnimationFrame = window["#{vendor}RequestAnimationFrame"]
+        window.cancelAnimationFrame  = window["#{vendor}CancelAnimationFrame"] || window["#{vendor}CancelRequestAnimationFrame"]
+  
+    # let's do something really crazy! 
+    if !window.requestAnimationFrame? 
+        window.requestAnimationFrame = (callback, element) ->
+            curTime = new Date().getTime()
+            timeToCall = Math.max 0, 16 - (curTime - lastTime)
+            id = window.setTimeout -> 
+                callback curTime + timeToCall
+            , timeToCall
+
+            lastTime = curTime + timeToCall
+            id
+
+    if !window.cancelAnimationFrame
+        window.cancelAnimationFrame = (id) ->
+            clearTimeout id
+
+    null
+
+
+#
+# Start Plugin 
+#
+$ = jQuery
+
+# cache of already loaded images
+Cache =
+    # this is a cache of $.Deferred objects so we don't load an image more than
+    # once
+    cache: {}
+    loadSprites: (src) ->
+        if ! @cache[src]?
+            def = $.Deferred()
+            @cache[src] = def.promise()
+            img = new Image
+            img.src = src
+            img.onload = =>
+                def.resolve img
+            img.onerror = =>
+                def.reject src
+            img.onabort = =>
+                def.reject src
+        
+        @cache[src]
+
+    loadIndex: (src) ->
+        if ! @cache[src]
+            def = $.Deferred()
+            @cache[src] = def.promise()
+            $.getJSON(src)
+                .done (data) ->
+                    def.resolve data
+                .fail (reason) ->
+                    def.reject reason
+        @cache[src]
+
+methods =
+    init: (options) ->
+        settings = $.extend
+            time : 1.0
+            loop: 'infinite'
+            play: true
+            offsetX: 0
+            offsetY: 0
+            sprites: null
+            index: null
+        , options
+        
+        @each ->
+            $this = $(this)
+
+            return if $(this).data('anim8')
+            
+            index   = $this.data 'index'
+            sprites = $this.data 'sprites'
+            time    = parseFloat $this.data 'time'
+            offsetX = parseInt $this.data 'offset-x'
+            offsetY = parseInt $this.data 'offset-y'
+
+            $.when(Cache.loadSprites(sprites), Cache.loadIndex(index))
+                .done (sprites, index) ->
+                    # controls the state of the animation ..
+                    data =
+                        state: "none"
+                        curFrame: 0
+                        lastTime: 0
+                        frameCount: index.frames.length
+                        frameDelay: time * 1000 / index.frames.length
+                        loopsRemaining: settings.loop
+                        sprites: sprites
+                        index: index
+                        offsetX: offsetX
+                        offsetY: offsetY
+
+                    $this.data "anim8", data
+                    
+                    if settings.play == true
+                        data.state = "play"
+                    
+                    # draw the first frame of animation so canvas is not
+                    # blank...
+                    $this.anim8 "draw"
+                    
+    getData: ->
+        $(this).data('anim8')
+
+    start: (loopTimes = 'infinite') ->
+        @each ->
+            data = $(this).anim8('getData')
+            data.state = 'play'
+            data.loopsRemaining = loopTimes
+            $(this).anim8('draw')
+
+    stop: ->
+        @each ->
+            $(this).anim8('getData').state = 'stop'
+            $(this)
+
+    reset: ->
+        @each ->
+            $(this).anim8('getData').curFrame = 0
+            $(this).anim8('draw', true)
+
+    # draws and beings the animation loop
+    # drawing usually only 
+    draw: ->
+        @each ->
+            $this = $(this)
+            data = $this.data("anim8")
+
+            canvas = $this.get(0)
+            context = canvas.getContext "2d"
+
+            animate = (now) ->
+
+                if (data.lastTime > 0 and now - data.lastTime < data.frameDelay)
+                    window.requestAnimationFrame animate
+                    return
+                
+                
+                # looping control
+                if data.loopsRemaining != 'infinite'
+                    # stop looping on the last frame 
+                    if data.curFrame % data.frameCount == data.frameCount - 1
+                        data.loopsRemaining -= 1
+                        if data.loopsRemaining == 0
+                            data.state = 'stop'
+                            return $this
+
+                curFrame = data.curFrame % data.frameCount
+
+                tile = data.index.frames[curFrame]
+                sSize = tile.spriteSourceSize
+                context.clearRect 0, 0, canvas.width, canvas.height
+                context.drawImage data.sprites,
+                    tile.frame.x, tile.frame.y      # where to clip from the Image data
+                    tile.frame.w, tile.frame.h      # size of the tile
+                    data.offsetX + sSize.x,         # positioning inside the context
+                    data.offsetY + sSize.y,
+                    tile.frame.w, tile.frame.h      # size of the tile to draw
+                
+                # update for next time through the loop
+                data.lastTime = now
+                data.curFrame += 1
+
+                # repeat the loop 
+                window.requestAnimationFrame animate if data.state == 'play'
+
+            window.requestAnimationFrame animate
+
+$.fn.anim8 = (method, args...) ->
+    if methods[method]?
+        methods[method].apply this, args
+    else if typeof method == 'object' || ! method
+        methods.init.apply this, arguments
+    else
+        $.error "Method #{method} does not exist on jQuery.anim8"
+
+           
+            
