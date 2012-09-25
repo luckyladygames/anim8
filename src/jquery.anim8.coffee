@@ -114,8 +114,6 @@ methods =
             settings.offsetY = parseInt $this.data 'offset-y' if $this.data('offset-y')?
             settings.loop = parseInt $this.data 'loop' if $this.data('loop')?
 
-            console.log settings
-
             return $.error("No animation index") unless settings.index?
             return $.error("No animation sheet") unless settings.sheet?
 
