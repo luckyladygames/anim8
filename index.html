@@ -1,0 +1,133 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="./jquery.anim8.js"></script>
+  <script>
+    $(function() {
+      $('canvas.anim8').anim8({
+        'play': false
+      }
+      );
+      $('button.start-stop').on("click", function() {
+        targetId = $(this).data('canvas')
+        $target = $('#' + targetId)
+        data = $target.anim8('getData');
+        if (data.state == 'play') {
+          $target.anim8('stop');
+        } else {
+          $target.anim8('start');
+        }
+      });
+      $('button.reset').on("click", function() {
+        targetId = $(this).data('canvas');
+        $('#' + targetId).anim8('reset');
+      });
+      $('button.loop').on('click', function() {
+        targetId = $(this).data('canvas');
+        times = parseInt($(this).data('loop'));
+
+        $('#' + targetId)
+          .anim8('stop')
+          .anim8('reset')
+          .anim8('start', times);
+      });
+    
+      $('#startAll').on('click', function() {
+        $('canvas.anim8').anim8('start')
+      });
+      $('#stopAll').on('click', function() {
+        $('canvas.anim8').anim8('stop')
+      });
+      $('#resetAll').on('click', function() {
+        $('canvas.anim8').anim8('reset')
+      });
+
+    });
+  </script>
+  <style>
+    #canvas canvas { 
+      border: 1px solid black;
+    }
+    section h2 { 
+      padding: 0.25em;
+    }
+    #code {
+    }
+    #code pre {
+      background-color: #C0C0C0;
+      padding: 1em;
+    }
+    #canvas {
+    }
+  </style>
+  <title></title>
+</head>
+<body>
+  <h1>jQuery anim8 Demo</h1>
+
+  <section id="canvas">
+    <h2>Canvas Animation Demos</h2>
+
+    <button id="startAll"><span>Start All</span></button>
+    <button id="stopAll"><span>Stop All</span></button>
+    <button id="resetAll"><span>Reset All</span></button>
+
+    
+    <h3>0.5 second loop</h3> 
+    <canvas width="200" height="200"
+      id="anim8_1"
+      class="anim8"
+      data-index="/test/nums.json" data-sprites="/test/nums.png"
+      data-offset-x="25"
+      data-offset-y="29"
+      data-time="0.5"></canvas>
+      <br/>
+      <button class="start-stop" data-canvas="anim8_1"><span>start/stop</span></button>
+      <button class="reset" data-canvas="anim8_1"><span>reset</span></button>
+      <button class="loop" data-canvas="anim8_1" data-loop="1"><span>loop once</span></button>
+      <button class="loop" data-canvas="anim8_1" data-loop="2"><span>loop twice</span></button>
+    
+    <h3>1.5 second loop</h3> 
+    <canvas width="200" height="200"
+      id="anim8_2"
+      class="anim8"
+      data-index="/test/nums.json" data-sprites="/test/nums.png"
+      data-offset-x="25"
+      data-offset-y="29"
+      data-time="1.5"></canvas>
+      <br/><button class="start-stop" data-canvas="anim8_2"><span>start/stop</span></button>
+      <button class="reset" data-canvas="anim8_2"><span>reset</span></button>
+      <button class="loop" data-canvas="anim8_2" data-loop="1"><span>loop once</span></button>
+      <button class="loop" data-canvas="anim8_2" data-loop="2"><span>loop twice</span></button>
+
+    <h3>3.5 second loop</h3> 
+    <canvas width="200" height="200"
+      id="anim8_3"
+      class="anim8"
+      data-index="/test/nums.json" data-sprites="/test/nums.png"
+      data-offset-x="25"
+      data-offset-y="29"
+      data-time="3.5"></canvas>
+      <br/><button class="start-stop" data-canvas="anim8_3"><span>start/stop</span></button>
+      <button class="reset" data-canvas="anim8_3"><span>reset</span></button>
+      <button class="loop" data-canvas="anim8_3" data-loop="1"><span>loop once</span></button>
+      <button class="loop" data-canvas="anim8_3" data-loop="2"><span>loop twice</span></button>
+      
+    <h3>5.5 second loop</h3> 
+    <canvas width="200" height="200"
+      id="anim8_4"
+      class="anim8"
+      data-index="/test/nums.json" data-sprites="/test/nums.png"
+      data-offset-x="25"
+      data-offset-y="29"
+      data-time="5.5"></canvas>
+      <br/><button class="start-stop" data-canvas="anim8_4"><span>start/stop</span></button>
+      <button class="reset" data-canvas="anim8_4"><span>reset</span></button>
+      <button class="loop" data-canvas="anim8_4" data-loop="1"><span>loop once</span></button>
+      <button class="loop" data-canvas="anim8_4" data-loop="2"><span>loop twice</span></button>
+  </section>
+
+</body>
+</html>
