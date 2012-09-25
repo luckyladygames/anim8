@@ -1,5 +1,5 @@
 ###
-v: 0.0.1 alpha
+v: 0.0.2 alpha
 ###
 
 #
@@ -62,7 +62,7 @@ Cache =
     # this is a really simple cache of $.Deferred objects so we don't pull them down 
     # more than once
     cache: {}
-    loadSprites: (src) ->
+    loadSheet: (src) ->
         if ! @cache[src]?
             def = $.Deferred()
             @cache[src] = def.promise()
@@ -91,41 +91,48 @@ Cache =
 # Hey, straight from the jQuery guidelines ... ;)
 methods =
     init: (options) ->
-        settings = $.extend
-            time : 1.0
-            loop: 'infinite'
-            play: true
-            offsetX: 0
-            offsetY: 0
-            sprites: null
-            index: null
-        , options
-        
         @each ->
             $this = $(this)
 
-            return if $(this).data('anim8')
-            
-            index   = $this.data 'index'
-            sprites = $this.data 'sprites'
-            time    = parseFloat $this.data 'time'
-            offsetX = parseInt $this.data 'offset-x'
-            offsetY = parseInt $this.data 'offset-y'
+            # break if we are already initialized
+            return if $this.data('anim8')
 
-            $.when(Cache.loadSprites(sprites), Cache.loadIndex(index))
-                .done (sprites, index) ->
+            settings = $.extend
+                time : 1.0
+                loop: 'infinite'
+                play: true
+                offsetX: 0
+                offsetY: 0
+                index: null
+                sheet: null
+            , options
+            
+            settings.index = $this.data 'index' if $this.data('index')?
+            settings.sheet = $this.data 'sheet' if $this.data('sheet')?
+            settings.time = parseFloat $this.data 'time' if $this.data('time')?
+            settings.offsetX = parseInt $this.data 'offset-x' if $this.data('offset-x')?
+            settings.offsetY = parseInt $this.data 'offset-y' if $this.data('offset-y')?
+            settings.loop = parseInt $this.data 'loop' if $this.data('loop')?
+
+            console.log settings
+
+            return $.error("No animation index") unless settings.index?
+            return $.error("No animation sheet") unless settings.sheet?
+
+            $.when(Cache.loadSheet(settings.sheet), Cache.loadIndex(settings.index))
+                .done (sheet, index) ->
                     # controls the state of the animation ..
                     data =
                         state: "none"
                         curFrame: 0
                         lastTime: 0
                         frameCount: index.frames.length
-                        frameDelay: time * 1000 / index.frames.length
+                        frameDelay: settings.time * 1000 / index.frames.length
                         loopsRemaining: settings.loop
-                        sprites: sprites
+                        sheet: sheet
                         index: index
-                        offsetX: offsetX
-                        offsetY: offsetY
+                        offsetX: settings.offsetX
+                        offsetY: settings.offsetY
 
                     $this.data "anim8", data
                     
@@ -174,7 +181,6 @@ methods =
                     window.requestAnimationFrame animate
                     return
                 
-                
                 # looping control
                 if data.loopsRemaining != 'infinite'
                     # stop looping on the last frame 
@@ -189,7 +195,7 @@ methods =
                 tile = data.index.frames[curFrame]
                 sSize = tile.spriteSourceSize
                 context.clearRect 0, 0, canvas.width, canvas.height
-                context.drawImage data.sprites,
+                context.drawImage data.sheet,
                     tile.frame.x, tile.frame.y      # where to clip from the Image data
                     tile.frame.w, tile.frame.h      # size of the tile
                     data.offsetX + sSize.x,         # positioning inside the context

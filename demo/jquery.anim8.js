@@ -48,7 +48,7 @@ v: 0.0.1 alpha
 
   Cache = {
     cache: {},
-    loadSprites: function(src) {
+    loadSheet: function(src) {
       var def, img,
         _this = this;
       if (!(this.cache[src] != null)) {
@@ -85,40 +85,59 @@ v: 0.0.1 alpha
 
   methods = {
     init: function(options) {
-      var settings;
-      settings = $.extend({
-        time: 1.0,
-        loop: 'infinite',
-        play: true,
-        offsetX: 0,
-        offsetY: 0,
-        sprites: null,
-        index: null
-      }, options);
       return this.each(function() {
-        var $this, index, offsetX, offsetY, sprites, time;
+        var $this, settings;
         $this = $(this);
-        if ($(this).data('anim8')) {
+        if ($this.data('anim8')) {
           return;
         }
-        index = $this.data('index');
-        sprites = $this.data('sprites');
-        time = parseFloat($this.data('time'));
-        offsetX = parseInt($this.data('offset-x'));
-        offsetY = parseInt($this.data('offset-y'));
-        return $.when(Cache.loadSprites(sprites), Cache.loadIndex(index)).done(function(sprites, index) {
+        settings = $.extend({
+          time: 1.0,
+          loop: 'infinite',
+          play: true,
+          offsetX: 0,
+          offsetY: 0,
+          index: null,
+          sheet: null
+        }, options);
+        if ($this.data('index') != null) {
+          settings.index = $this.data('index');
+        }
+        if ($this.data('sheet') != null) {
+          settings.sheet = $this.data('sheet');
+        }
+        if ($this.data('time') != null) {
+          settings.time = parseFloat($this.data('time'));
+        }
+        if ($this.data('offset-x') != null) {
+          settings.offsetX = parseInt($this.data('offset-x'));
+        }
+        if ($this.data('offset-y') != null) {
+          settings.offsetY = parseInt($this.data('offset-y'));
+        }
+        if ($this.data('loop') != null) {
+          settings.loop = parseInt($this.data('loop'));
+        }
+        console.log(settings);
+        if (settings.index == null) {
+          return $.error("No animation index");
+        }
+        if (settings.sheet == null) {
+          return $.error("No animation sheet");
+        }
+        return $.when(Cache.loadSheet(settings.sheet), Cache.loadIndex(settings.index)).done(function(sheet, index) {
           var data;
           data = {
             state: "none",
             curFrame: 0,
             lastTime: 0,
             frameCount: index.frames.length,
-            frameDelay: time * 1000 / index.frames.length,
+            frameDelay: settings.time * 1000 / index.frames.length,
             loopsRemaining: settings.loop,
-            sprites: sprites,
+            sheet: sheet,
             index: index,
-            offsetX: offsetX,
-            offsetY: offsetY
+            offsetX: settings.offsetX,
+            offsetY: settings.offsetY
           };
           $this.data("anim8", data);
           if (settings.play === true) {
@@ -181,7 +200,7 @@ v: 0.0.1 alpha
           tile = data.index.frames[curFrame];
           sSize = tile.spriteSourceSize;
           context.clearRect(0, 0, canvas.width, canvas.height);
-          context.drawImage(data.sprites, tile.frame.x, tile.frame.y, tile.frame.w, tile.frame.h, data.offsetX + sSize.x, data.offsetY + sSize.y, tile.frame.w, tile.frame.h);
+          context.drawImage(data.sheet, tile.frame.x, tile.frame.y, tile.frame.w, tile.frame.h, data.offsetX + sSize.x, data.offsetY + sSize.y, tile.frame.w, tile.frame.h);
           data.lastTime = now;
           data.curFrame += 1;
           if (data.state === 'play') {
