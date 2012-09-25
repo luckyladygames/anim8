@@ -118,7 +118,6 @@ v: 0.0.2 alpha
         if ($this.data('loop') != null) {
           settings.loop = parseInt($this.data('loop'));
         }
-        console.log(settings);
         if (settings.index == null) {
           return $.error("No animation index");
         }
