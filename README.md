@@ -13,3 +13,10 @@ that allows us to turn `<canvas>` tags into looping animations.
 This is still a very early project but checkout the demos and the sources for
 examples of it in action.
 
+Requirements
+============
+
+The only dependency (and it's a big one) is TexturePacker. We use TexturePacker
+to create a packed image of sprites and a json based index on the frames. For
+our games this allows us to reduce the the number of network calls and files
+loaded. 
