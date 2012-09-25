@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script src="./jquery.anim8.js"></script>
+  <script src="https://raw.github.com/mostlygeek/anim8/master/dist/jquery.anim8.min.js"></script>
   <script>
     $(function() {
       $('canvas.anim8').anim8({
-        'play': false
+        'play': false // prevent animations from starting automatically
       }
       );
       $('button.start-stop').on("click", function() {
@@ -73,7 +73,6 @@
     <button id="startAll"><span>Start All</span></button>
     <button id="stopAll"><span>Stop All</span></button>
     <button id="resetAll"><span>Reset All</span></button>
-
     
     <h3>0.5 second loop</h3> 
     <canvas width="200" height="200"
