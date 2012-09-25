@@ -1,3 +1,8 @@
+###
+v: 0.0.1 alpha
+###
+
+#
 # Copyright (C) 2012 Benson Wong
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
