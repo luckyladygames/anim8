@@ -44,6 +44,8 @@
         $('canvas.anim8').anim8('reset')
       });
 
+      $('canvas.anim8-flames').anim8();
+
     });
   </script>
   <style>
@@ -58,8 +60,6 @@
     #code pre {
       background-color: #C0C0C0;
       padding: 1em;
-    }
-    #canvas {
     }
   </style>
   <title></title>
@@ -81,6 +81,7 @@
 
     <p>Combined with the <a href="nums.json">JSON index</a> the library plays each
     frame over a set loop time. </p>
+
 
   <section id="canvas">
     <h2>Canvas Animation Demos</h2>
@@ -144,6 +145,25 @@
       <button class="loop" data-canvas="anim8_4" data-loop="1"><span>loop once</span></button>
       <button class="loop" data-canvas="anim8_4" data-loop="2"><span>loop twice</span></button>
   </section>
+  
+  <p>Here is a better example of our flames animation. The background is defined
+  as CSS colors and the animation is a transparent png in the canvas.</p>
+    <div style="width: 100px; height: 200px; background-color: #C0C0C0; display: inline-block">
+      <canvas width="100" height="200"
+        class="anim8-flames"
+        data-index="flames.json"
+        data-sheet="flames.png"
+        data-offset-x=-50
+        data-time=1.5></canvas>
+    </div>
+    <div style="width: 100px; height: 200px; background-color: black; display: inline-block">
+      <canvas width="100" height="200"
+        class="anim8-flames"
+        data-index="flames.json"
+        data-sheet="flames.png"
+        data-offset-x=-50
+        data-time=1.5></canvas>
+    </div>
 
 </body>
 </html>
