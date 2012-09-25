@@ -22,7 +22,6 @@ v: 0.0.1 alpha
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
-
 # polyfill for request animation time... 
 # credit: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 do ->
@@ -53,7 +52,6 @@ do ->
             clearTimeout id
 
     null
-
 
 #
 # Start Plugin 
