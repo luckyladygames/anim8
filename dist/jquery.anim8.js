@@ -86,7 +86,7 @@ v: 0.0.3 alpha
   methods = {
     init: function(options) {
       return this.each(function() {
-        var $this, settings;
+        var $this, data, settings;
         $this = $(this);
         if ($this.data('anim8')) {
           return;
@@ -124,24 +124,32 @@ v: 0.0.3 alpha
         if (settings.sheet == null) {
           return $.error("No animation sheet");
         }
+        data = {
+          ready: false,
+          state: "stop",
+          curFrame: 0,
+          lastTime: 0,
+          loopsRemaining: settings.loop,
+          offsetX: settings.offsetX,
+          offsetY: settings.offsetY,
+          sheet: null,
+          index: null,
+          frameCount: 0,
+          frameDelay: 0
+        };
+        $this.data("anim8", data);
         return $.when(Cache.loadSheet(settings.sheet), Cache.loadIndex(settings.index)).done(function(sheet, index) {
-          var data;
-          data = {
-            state: "none",
-            curFrame: 0,
-            lastTime: 0,
-            frameCount: index.frames.length,
-            frameDelay: settings.time * 1000 / index.frames.length,
-            loopsRemaining: settings.loop,
-            sheet: sheet,
-            index: index,
-            offsetX: settings.offsetX,
-            offsetY: settings.offsetY
-          };
-          $this.data("anim8", data);
+          data.sheet = sheet;
+          data.index = index;
+          data.frameCount = index.frames.length;
+          data.frameDelay = settings.time * 1000 / index.frames.length;
+          data.ready = true;
           if (settings.play === true) {
             data.state = "play";
+          } else {
+            data.state = "stop";
           }
+          $this.trigger('anim8.ready');
           return $this.anim8("draw");
         });
       });
@@ -156,6 +164,9 @@ v: 0.0.3 alpha
       return this.each(function() {
         var data;
         data = $(this).anim8('getData');
+        if (!data.ready) {
+          return;
+        }
         data.state = 'play';
         data.loopsRemaining = loopTimes;
         return $(this).anim8('draw');
@@ -163,14 +174,19 @@ v: 0.0.3 alpha
     },
     stop: function() {
       return this.each(function() {
-        $(this).anim8('getData').state = 'stop';
+        var data;
+        data = $(this).anim8('getData');
+        if (!data.ready) {
+          return;
+        }
+        data.state = 'stop';
         return $(this);
       });
     },
     reset: function() {
       return this.each(function() {
         $(this).anim8('getData').curFrame = 0;
-        return $(this).anim8('draw', true);
+        return $(this).anim8('draw');
       });
     },
     draw: function() {
