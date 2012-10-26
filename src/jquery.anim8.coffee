@@ -107,39 +107,53 @@ methods =
                 sheet: null
             , options
             
-            settings.index = $this.data 'index' if $this.data('index')?
-            settings.sheet = $this.data 'sheet' if $this.data('sheet')?
-            settings.time = parseFloat $this.data 'time' if $this.data('time')?
-            settings.offsetX = parseInt $this.data 'offset-x' if $this.data('offset-x')?
-            settings.offsetY = parseInt $this.data 'offset-y' if $this.data('offset-y')?
-            settings.loop = parseInt $this.data 'loop' if $this.data('loop')?
+            settings.index = $this.data('index') if $this.data('index')?
+            settings.sheet = $this.data('sheet') if $this.data('sheet')?
+            settings.time = parseFloat($this.data('time')) if $this.data('time')?
+            settings.offsetX = parseInt($this.data('offset-x')) if $this.data('offset-x')?
+            settings.offsetY = parseInt($this.data('offset-y')) if $this.data('offset-y')?
+            settings.loop = parseInt($this.data('loop')) if $this.data('loop')?
 
             return $.error("No animation index") unless settings.index?
             return $.error("No animation sheet") unless settings.sheet?
 
+            data =
+                ready: false    # the index/sheet have finished loading
+                state: "stop"
+                curFrame: 0
+                lastTime: 0
+                loopsRemaining: settings.loop
+                offsetX: settings.offsetX
+                offsetY: settings.offsetY
+                
+                # to be loaded later ... when the sheet and index is loaded
+                sheet: null
+                index: null
+                frameCount: 0
+                frameDelay: 0
+
+            $this.data("anim8", data)
+
             $.when(Cache.loadSheet(settings.sheet), Cache.loadIndex(settings.index))
                 .done (sheet, index) ->
                     # controls the state of the animation ..
-                    data =
-                        state: "none"
-                        curFrame: 0
-                        lastTime: 0
-                        frameCount: index.frames.length
-                        frameDelay: settings.time * 1000 / index.frames.length
-                        loopsRemaining: settings.loop
-                        sheet: sheet
-                        index: index
-                        offsetX: settings.offsetX
-                        offsetY: settings.offsetY
-
-                    $this.data "anim8", data
+                    data.sheet = sheet 
+                    data.index = index
+                    data.frameCount = index.frames.length
+                    data.frameDelay = settings.time * 1000 / index.frames.length
                     
+                    data.ready = true
+
                     if settings.play == true
                         data.state = "play"
+                    else
+                        data.state = "stop"
+
+                    $this.trigger('anim8.ready')
                     
                     # draw the first frame of animation so canvas is not
                     # blank...
-                    $this.anim8 "draw"
+                    $this.anim8("draw")
                     
     getData: ->
         $(this).data('anim8')
@@ -147,19 +161,22 @@ methods =
     start: (loopTimes = 'infinite') ->
         @each ->
             data = $(this).anim8('getData')
+            return unless data.ready
             data.state = 'play'
             data.loopsRemaining = loopTimes
             $(this).anim8('draw')
 
     stop: ->
         @each ->
-            $(this).anim8('getData').state = 'stop'
+            data = $(this).anim8('getData')
+            return unless data.ready
+            data.state = 'stop'
             $(this)
 
     reset: ->
         @each ->
             $(this).anim8('getData').curFrame = 0
-            $(this).anim8('draw', true)
+            $(this).anim8('draw')  # draw the new frame (0)
 
     # draws and beings the animation loop
     # drawing usually only 
@@ -187,6 +204,7 @@ methods =
                         if data.loopsRemaining == 0
                             data.state = 'stop'
                             return $this
+
 
                 curFrame = data.curFrame % data.frameCount
 

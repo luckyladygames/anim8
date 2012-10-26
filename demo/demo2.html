@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="./jquery.anim8.js"></script>
+  <script>
+  $(function() {
+    $('#anim8').anim8({play: false}).on('anim8.ready', function() {
+      console.log("Animation resources loaded ... let's go");
+      $(this).anim8('start');
+    });
+  });
+  </script>
+</head>
+
+<body>
+    <canvas width="200" height="200"
+      id="anim8"
+      class="anim8"
+      data-index="/demo/nums.json" 
+      data-sheet="/demo/nums.png"
+      data-time="0.5"></canvas>
+</body>
+</html>
